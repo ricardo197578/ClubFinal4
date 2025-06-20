@@ -1,6 +1,8 @@
 //CODIGO COMENTADO POR IA
 using System;
 using System.Collections.Generic;
+//capa de acceso a datos
+//operaciones crud
 using ClubDeportivo.Models;
 
 namespace ClubDeportivo.Interfaces

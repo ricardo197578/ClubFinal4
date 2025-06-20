@@ -5,22 +5,21 @@ using ClubDeportivo.Repositories;
 using ClubDeportivo.Models;
 using System.Drawing;
 
-
 namespace ClubDeportivo.Views.Forms
 {
     public class NoSocioForm : Form
     {
-        private readonly NoSocioService _noSocioService;
-        private readonly TextBox txtNombre;
-        private readonly TextBox txtApellido;
-        private readonly TextBox txtDni;
-        private readonly DataGridView dataGridView;
+        private readonly NoSocioService _noSocioService;  // Servicio para manejar lógica de No Socios
+        private readonly TextBox txtNombre;                // Campo para ingresar nombre
+        private readonly TextBox txtApellido;              // Campo para ingresar apellido
+        private readonly TextBox txtDni;                   // Campo para ingresar DNI
+        private readonly DataGridView dataGridView;        // Tabla para mostrar No Socios
 
         public NoSocioForm()
         {
             // Configuración inicial del formulario
             this.Text = "Gestión de No Socios";
-            this.Width = 650;  
+            this.Width = 650;
             this.Height = 500;
             this.StartPosition = FormStartPosition.CenterScreen;
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -113,9 +112,9 @@ namespace ClubDeportivo.Views.Forms
             };
 
             // Configuración de eventos
-            btnGuardar.Click += BtnGuardar_Click;
-            btnListar.Click += BtnListar_Click;
-            btnSalir.Click += (sender, e) => this.Close();
+            btnGuardar.Click += BtnGuardar_Click;   // Evento para guardar No Socio
+            btnListar.Click += BtnListar_Click;     // Evento para listar No Socios
+            btnSalir.Click += (sender, e) => this.Close(); // Cierra el formulario
 
             // Agregar controles al formulario
             this.Controls.AddRange(new Control[]

@@ -8,10 +8,14 @@ namespace ClubDeportivo.Views.Forms
 {
     public partial class frmGestionCarnet : Form
     {
+        // Servicios para manejar socios y carnets
         private readonly ISocioService _socioService;
         private readonly ICarnetService _carnetService;
+
+        // Socio actualmente seleccionado en la interfaz
         private Socio _socioSeleccionado;
 
+        // Constructor que recibe los servicios por inyección
         public frmGestionCarnet(ISocioService socioService, ICarnetService carnetService)
         {
             InitializeComponent();
@@ -20,6 +24,7 @@ namespace ClubDeportivo.Views.Forms
             ConfigurarControles();
         }
 
+        // Configura el formulario y sus controles iniciales
         private void ConfigurarControles()
         {
             this.Text = "Gestión de Carnet de Socio";
@@ -29,32 +34,36 @@ namespace ClubDeportivo.Views.Forms
 
             txtDniSocio.Clear();
             btnBuscarPorDni.Click += btnBuscarPorDni_Click;
+
             HabilitarControlesCarnet(false);
 
-            // Limpiar
+            // Cambia el texto del botón cancelar a "Limpiar"
             btnCancelar.Text = "Limpiar";
-            
-            // Salir 
-           var btnSalir = new Button
+
+            // Crear botón Salir
+            var btnSalir = new Button
             {
                 Text = "Salir",
                 Size = btnCancelar.Size
             };
 
-            // centrar los botones
+            // Calcular posición para centrar los botones Limpiar y Salir
             int espacioEntreBotones = 10;
             int anchoTotalBotones = btnCancelar.Width + btnSalir.Width + espacioEntreBotones;
             int posicionX = (this.ClientSize.Width - anchoTotalBotones) / 2;
 
-            // Posicionar botones
+            // Posicionar los botones en la ventana
             btnCancelar.Location = new System.Drawing.Point(posicionX, btnCancelar.Location.Y);
             btnSalir.Location = new System.Drawing.Point(posicionX + btnCancelar.Width + espacioEntreBotones, btnCancelar.Location.Y);
 
+            // Evento para cerrar el formulario al hacer click en salir
             btnSalir.Click += (sender, e) => this.Close();
+
+            // Añade el botón Salir al formulario
             this.Controls.Add(btnSalir);
         }
 
-       
+        // Habilita o deshabilita controles relacionados al carnet
         private void HabilitarControlesCarnet(bool habilitar)
         {
             chkAptoFisico.Enabled = habilitar;
@@ -62,6 +71,7 @@ namespace ClubDeportivo.Views.Forms
             btnConfirmarEntrega.Enabled = false;
         }
 
+        // Evento click para buscar un socio por DNI
         private void btnBuscarPorDni_Click(object sender, EventArgs e)
         {
             try
@@ -73,6 +83,7 @@ namespace ClubDeportivo.Views.Forms
                     return;
                 }
 
+                // Buscar el socio usando el servicio
                 _socioSeleccionado = _socioService.GetSocio(txtDniSocio.Text.Trim());
 
                 if (_socioSeleccionado == null)
@@ -83,6 +94,7 @@ namespace ClubDeportivo.Views.Forms
                     return;
                 }
 
+                // Mostrar datos del socio y verificar si ya tiene carnet
                 MostrarDatosSocio();
                 VerificarCarnetExistente();
                 HabilitarControlesCarnet(true);
@@ -94,6 +106,7 @@ namespace ClubDeportivo.Views.Forms
             }
         }
 
+        // Muestra los datos del socio en la interfaz
         private void MostrarDatosSocio()
         {
             lblNombre.Text = _socioSeleccionado.Nombre;
@@ -101,6 +114,7 @@ namespace ClubDeportivo.Views.Forms
             lblDniValue.Text = _socioSeleccionado.Dni;
         }
 
+        // Verifica si el socio ya tiene un carnet y muestra sus datos si existe
         private void VerificarCarnetExistente()
         {
             var carnet = _carnetService.GetCarnetBySocio(_socioSeleccionado.Id);
@@ -122,6 +136,7 @@ namespace ClubDeportivo.Views.Forms
             }
         }
 
+        // Limpia los controles relacionados con la info del socio y carnet
         private void LimpiarControles()
         {
             lblNombre.Text = string.Empty;
@@ -132,6 +147,7 @@ namespace ClubDeportivo.Views.Forms
             HabilitarControlesCarnet(false);
         }
 
+        // Limpia los datos del carnet en pantalla
         private void LimpiarDatosCarnet()
         {
             lblNroCarnet.Text = string.Empty;
@@ -140,6 +156,7 @@ namespace ClubDeportivo.Views.Forms
             chkAptoFisico.Checked = false;
         }
 
+        // Evento click para generar carnet al socio
         private void btnGenerar_Click(object sender, EventArgs e)
         {
             if (_socioSeleccionado == null)
@@ -158,8 +175,12 @@ namespace ClubDeportivo.Views.Forms
                     return;
                 }
 
+                // Generar carnet a través del servicio
                 _carnetService.GenerateCarnetForSocio(_socioSeleccionado.Id, chkAptoFisico.Checked);
+
+                // Actualizar datos del carnet en la UI
                 VerificarCarnetExistente();
+
                 MessageBox.Show("Carnet generado exitosamente.", "Éxito",
                               MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -170,6 +191,7 @@ namespace ClubDeportivo.Views.Forms
             }
         }
 
+        // Evento click para confirmar la entrega del carnet
         private void btnConfirmarEntrega_Click(object sender, EventArgs e)
         {
             try
@@ -186,6 +208,7 @@ namespace ClubDeportivo.Views.Forms
             }
         }
 
+        // Evento click para limpiar el formulario
         private void btnCancelar_Click(object sender, EventArgs e)
         {
             LimpiarControles();

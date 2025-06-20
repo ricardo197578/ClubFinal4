@@ -11,18 +11,20 @@ namespace ClubDeportivo.Views.Forms
 {
     public class GestionCuotasForm : Form
     {
-        private readonly ICuotaService _cuotaService;
-        private readonly DataGridView dataGridView;
+        private readonly ICuotaService _cuotaService;  // Servicio para obtener datos de cuotas y socios
+        private readonly DataGridView dataGridView;    // Control para mostrar datos tabulares
 
         private Button btnListarTodos;
         private Button btnSociosVencidos;
         private Button btnDetalleCuotas;
         private Button btnSalir;
 
+        // Constructor recibe servicio de cuotas
         public GestionCuotasForm(ICuotaService cuotaService)
         {
             _cuotaService = cuotaService;
 
+            // Configuración básica del formulario
             this.Text = "Gestión de Cuotas";
             this.Width = 800;
             this.Height = 500;
@@ -30,11 +32,11 @@ namespace ClubDeportivo.Views.Forms
             this.FormBorderStyle = FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
 
-            // Configuración del DataGridView para .NET 4.0
+            // Crear y configurar el DataGridView para mostrar información de socios y cuotas
             dataGridView = new DataGridView();
             dataGridView.Location = new Point(20, 80);
             dataGridView.Size = new Size(this.Width - 50, 350);
-            dataGridView.Font = new Font("Microsoft Sans Serif", 9); // Fuente compatible
+            dataGridView.Font = new Font("Microsoft Sans Serif", 9); // Fuente compatible con .NET 4.0
             dataGridView.ReadOnly = true;
             dataGridView.AllowUserToAddRows = false;
             dataGridView.AllowUserToDeleteRows = false;
@@ -43,19 +45,21 @@ namespace ClubDeportivo.Views.Forms
             dataGridView.RowHeadersVisible = false;
             dataGridView.ScrollBars = ScrollBars.Vertical;
 
-            // Configurar columnas
+            // Configurar las columnas del DataGridView
             ConfigurarColumnasDataGrid();
 
+            // Crear botones y asignar eventos
             InitializeButtons();
 
+            // Añadir DataGridView al formulario
             this.Controls.Add(dataGridView);
         }
 
+        // Define columnas visibles del DataGridView
         private void ConfigurarColumnasDataGrid()
         {
             dataGridView.Columns.Clear();
 
-            // Columnas con encabezados
             dataGridView.Columns.Add(new DataGridViewTextBoxColumn()
             {
                 Name = "ApellidoNombre",
@@ -84,11 +88,12 @@ namespace ClubDeportivo.Views.Forms
                 Width = 80
             });
 
-            // Configurar estilo para estado vencido
+            // Estilo especial para la columna Estado: color rojo y negrita para "VENCIDO"
             dataGridView.Columns["Estado"].DefaultCellStyle.ForeColor = Color.Red;
             dataGridView.Columns["Estado"].DefaultCellStyle.Font = new Font(dataGridView.Font, FontStyle.Bold);
         }
 
+        // Inicializa botones con texto, ubicación, tamaño y eventos
         private void InitializeButtons()
         {
             btnListarTodos = new Button();
@@ -118,28 +123,33 @@ namespace ClubDeportivo.Views.Forms
             btnSalir.BackColor = Color.LightGray;
             btnSalir.Click += (sender, e) => this.Close();
 
+            // Añadir botones al formulario
             this.Controls.Add(btnListarTodos);
             this.Controls.Add(btnSociosVencidos);
             this.Controls.Add(btnDetalleCuotas);
             this.Controls.Add(btnSalir);
         }
 
+        // Evento botón listar todos los socios
         private void BtnListarTodos_Click(object sender, EventArgs e)
         {
             CargarSocios(_cuotaService.ObtenerTodosSocios());
         }
 
+        // Evento botón listar socios con cuotas vencidas hoy
         private void BtnSociosVencidos_Click(object sender, EventArgs e)
         {
             CargarSocios(_cuotaService.ObtenerSociosConCuotasVencidas(DateTime.Today));
         }
 
+        // Evento botón para mostrar formulario detalle cuotas (abre nuevo formulario)
         private void BtnDetalleCuotas_Click(object sender, EventArgs e)
         {
             SociosConCuotasForm detalleForm = new SociosConCuotasForm(_cuotaService);
             detalleForm.ShowDialog();
         }
 
+        // Carga los socios en el DataGridView y resalta los vencidos
         private void CargarSocios(IEnumerable<Socio> socios)
         {
             dataGridView.Rows.Clear();
@@ -147,7 +157,7 @@ namespace ClubDeportivo.Views.Forms
             foreach (Socio socio in socios.OrderBy(s => s.Apellido).ThenBy(s => s.Nombre))
             {
                 string estadoCuota = socio.FechaVencimientoCuota < DateTime.Today ? "VENCIDO" : "AL DÍA";
-                
+
                 int rowIndex = dataGridView.Rows.Add(
                     string.Format("{0}, {1}", socio.Apellido, socio.Nombre),
                     socio.Dni,
@@ -155,14 +165,14 @@ namespace ClubDeportivo.Views.Forms
                     estadoCuota
                 );
 
-                // Resaltar filas vencidas
+                // Resalta las filas con cuotas vencidas con un color de fondo rosa claro
                 if (estadoCuota == "VENCIDO")
                 {
                     dataGridView.Rows[rowIndex].DefaultCellStyle.BackColor = Color.LightPink;
                 }
             }
 
-            // Mostrar conteo de registros
+            // Actualiza el título del formulario con la cantidad de registros mostrados
             this.Text = string.Format("Gestión de Cuotas - Mostrando {0} socios", dataGridView.Rows.Count);
         }
     }

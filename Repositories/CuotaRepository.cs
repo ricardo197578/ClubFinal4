@@ -6,19 +6,25 @@ using ClubDeportivo.Models;
 
 namespace ClubDeportivo.Repositories
 {
+    // Repositorio para la gestión de cuotas de socios
     public class CuotaRepository : ICuotaRepository
     {
+        // Helper para operaciones con la base de datos
         private readonly DatabaseHelper _dbHelper;
+        // Valor por defecto para las cuotas
         private const decimal ValorCuotaDefault = 5000.00m;
 
+        // Constructor que recibe el DatabaseHelper como dependencia
         public CuotaRepository(DatabaseHelper dbHelper)
         {
             _dbHelper = dbHelper;
-            InitializeDatabase();
+            InitializeDatabase(); // Inicializa la estructura de la base de datos
         }
 
+        // Método para crear la tabla de cuotas si no existe
         private void InitializeDatabase()
         {
+            // SQL para crear la tabla Cuotas con sus campos y relaciones
             var sql = @"CREATE TABLE IF NOT EXISTS Cuotas (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         SocioId INTEGER NOT NULL,
@@ -29,42 +35,41 @@ namespace ClubDeportivo.Repositories
                         MetodoPago INTEGER NOT NULL,
                         Periodo TEXT NOT NULL,
                         FOREIGN KEY(SocioId) REFERENCES Socios(Id))";
-            _dbHelper.ExecuteNonQuery(sql);
+            _dbHelper.ExecuteNonQuery(sql); // Ejecuta el comando SQL
         }
 
-   public void RegistrarPagoCuota(int socioId, decimal monto, DateTime fechaPago, 
-                             MetodoPago metodo) 
-{
-    // Obtener la fecha actual del socio
-    DateTime fechaVencimientoActual = ObtenerFechaVencimientoActual(socioId);
-    
-    // 1. Registrar el pago en la tabla Cuotas
-    var sqlInsert = @"INSERT INTO Cuotas 
-                    (SocioId, Monto, FechaPago, FechaVencimiento, Pagada, MetodoPago, Periodo) 
-                    VALUES 
-                    (@socioId, @monto, @fechaPago, @fechaVencimiento, 1, @metodo, @periodo)";
+        // Método para registrar el pago de una cuota
+        public void RegistrarPagoCuota(int socioId, decimal monto, DateTime fechaPago,
+                             MetodoPago metodo)
+        {
+            // Obtener la fecha actual del socio
+            DateTime fechaVencimientoActual = ObtenerFechaVencimientoActual(socioId);
 
-    _dbHelper.ExecuteNonQuery(sqlInsert,
-        new SQLiteParameter("@socioId", socioId),
-        new SQLiteParameter("@monto", monto),
-        new SQLiteParameter("@fechaPago", fechaPago.ToString("yyyy-MM-dd")),
-        new SQLiteParameter("@fechaVencimiento", fechaVencimientoActual.ToString("yyyy-MM-dd")),
-        new SQLiteParameter("@metodo", (int)metodo),
-        new SQLiteParameter("@periodo", fechaVencimientoActual.ToString("yyyy-MM")));
+            // 1. Registrar el pago en la tabla Cuotas
+            var sqlInsert = @"INSERT INTO Cuotas 
+                            (SocioId, Monto, FechaPago, FechaVencimiento, Pagada, MetodoPago, Periodo) 
+                            VALUES 
+                            (@socioId, @monto, @fechaPago, @fechaVencimiento, 1, @metodo, @periodo)";
 
-    // 2. Calcular nuevo vencimiento (30 días después del actual)
-   ActualizarFechaVencimiento(socioId, fechaVencimientoActual.AddDays(30));
-    
-    // 3. Actualizar la fecha en la tabla Socios
-    //ActualizarFechaVencimiento(socioId, nuevoVencimiento);
+            _dbHelper.ExecuteNonQuery(sqlInsert,
+                new SQLiteParameter("@socioId", socioId),
+                new SQLiteParameter("@monto", monto),
+                new SQLiteParameter("@fechaPago", fechaPago.ToString("yyyy-MM-dd")),
+                new SQLiteParameter("@fechaVencimiento", fechaVencimientoActual.ToString("yyyy-MM-dd")),
+                new SQLiteParameter("@metodo", (int)metodo),
+                new SQLiteParameter("@periodo", fechaVencimientoActual.ToString("yyyy-MM")));
 
-    // 4. Activar al socio si estaba inactivo
-    ActivarSocio(socioId);
-}
+            // 2. Calcular nuevo vencimiento (30 días después del actual)
+            ActualizarFechaVencimiento(socioId, fechaVencimientoActual.AddDays(30));
 
-       
+            // 3. Actualizar la fecha en la tabla Socios
+            //ActualizarFechaVencimiento(socioId, nuevoVencimiento);
 
-       
+            // 4. Activar al socio si estaba inactivo
+            ActivarSocio(socioId);
+        }
+
+        // Método para buscar un socio activo por su DNI
         public Socio BuscarSocioActivoPorDni(string dni)
         {
             var sql = @"SELECT Id, Nombre, Apellido, Dni, FechaInscripcion, 
@@ -90,6 +95,7 @@ namespace ClubDeportivo.Repositories
             };
         }
 
+        // Método para obtener la fecha de vencimiento actual de un socio
         public DateTime ObtenerFechaVencimientoActual(int socioId)
         {
             var sql = "SELECT FechaVencimientoCuota FROM Socios WHERE Id = @socioId";
@@ -101,6 +107,7 @@ namespace ClubDeportivo.Repositories
             return DateTime.Parse(dt.Rows[0]["FechaVencimientoCuota"].ToString());
         }
 
+        // Método para actualizar la fecha de vencimiento de un socio
         public void ActualizarFechaVencimiento(int socioId, DateTime nuevaFecha)
         {
             var sql = @"UPDATE Socios SET 
@@ -112,12 +119,14 @@ namespace ClubDeportivo.Repositories
                 new SQLiteParameter("@socioId", socioId));
         }
 
+        // Método para activar un socio
         public void ActivarSocio(int socioId)
         {
             var sql = "UPDATE Socios SET EstadoActivo = 1 WHERE Id = @socioId";
             _dbHelper.ExecuteNonQuery(sql, new SQLiteParameter("@socioId", socioId));
         }
 
+        // Método para obtener las cuotas por vencer hasta una fecha límite
         public IEnumerable<Cuota> ObtenerCuotasPorVencer(DateTime fechaLimite)
         {
             var cuotas = new List<Cuota>();
@@ -145,6 +154,7 @@ namespace ClubDeportivo.Repositories
             return cuotas;
         }
 
+        // Método para obtener todas las cuotas de un socio específico
         public IEnumerable<Cuota> ObtenerCuotasPorSocio(int socioId)
         {
             var cuotas = new List<Cuota>();
@@ -172,9 +182,10 @@ namespace ClubDeportivo.Repositories
             return cuotas;
         }
 
+        // Método para obtener el valor actual de la cuota
         public decimal ObtenerValorActualCuota()
         {
-            return ValorCuotaDefault;
+            return ValorCuotaDefault; // Retorna el valor por defecto
         }
     }
 }

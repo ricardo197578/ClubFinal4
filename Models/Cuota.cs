@@ -1,21 +1,24 @@
+// Archivo: Cuota.cs
 using System;
 
 namespace ClubDeportivo.Models
 {
+    // Clase que representa las cuotas de los socios
     public class Cuota
     {
-        public int Id { get; set; }
-        public int SocioId { get; set; }
-        public decimal Monto { get; set; }
-        public DateTime FechaPago { get; set; }
-        public DateTime FechaVencimiento { get; set; }
-        public bool Pagada { get; set; }
-        public MetodoPago Metodo { get; set; }
-        public string Periodo { get; set; } 
+        public int Id { get; set; } // Identificador único
+        public int SocioId { get; set; } // ID del socio asociado
+        public decimal Monto { get; set; } // Valor de la cuota
+        public DateTime FechaPago { get; set; } // Fecha de pago
+        public DateTime FechaVencimiento { get; set; } // Fecha de vencimiento
+        public bool Pagada { get; set; } // Estado de pago
+        public MetodoPago Metodo { get; set; } // Forma de pago (enum)
+        public string Periodo { get; set; } // Periodo en formato YYYY-MM
 
-        
+        // Constructor vacío
         public Cuota() { }
 
+        // Constructor completo
         public Cuota(int id, int socioId, decimal monto, DateTime fechaPago,
                     DateTime fechaVencimiento, bool pagada, MetodoPago metodo)
         {
@@ -29,6 +32,4 @@ namespace ClubDeportivo.Models
             Periodo = fechaVencimiento.ToString("yyyy-MM");
         }
     }
-
-    
 }

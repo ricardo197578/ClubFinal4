@@ -1,15 +1,19 @@
+// Archivo: Usuario.cs
 using System;
 
 namespace ClubDeportivo.Models
 {
+    // Clase que representa un usuario del sistema
     public class Usuario
     {
+        // Campos privados
         private string _nombreUsuario;
         private string _passwordHash;
         private string _rol = "Admin";
 
-        public int Id { get; set; }
+        public int Id { get; set; } // Identificador único
 
+        // Propiedad con validación para el nombre de usuario
         public string NombreUsuario
         {
             get { return _nombreUsuario; }
@@ -23,6 +27,7 @@ namespace ClubDeportivo.Models
             }
         }
 
+        // Propiedad con validación para la contraseña hasheada
         public string PasswordHash
         {
             get { return _passwordHash; }
@@ -34,20 +39,21 @@ namespace ClubDeportivo.Models
             }
         }
 
+        // Propiedad para el rol con valor por defecto "Admin"
         public string Rol
         {
             get { return _rol; }
             set { _rol = value ?? "Admin"; }
         }
 
-        public DateTime FechaCreacion { get; set; }
+        public DateTime FechaCreacion { get; set; } // Fecha de creación
+        public bool Activo { get; set; } // Estado activo/inactivo
 
-        public bool Activo { get; set; }
-
+        // Constructor que inicializa valores por defecto
         public Usuario()
         {
-            FechaCreacion = DateTime.Now;
-            Activo = true;
+            FechaCreacion = DateTime.Now; // Fecha actual
+            Activo = true; // Por defecto activo
         }
 
         // Método para validar todas las propiedades

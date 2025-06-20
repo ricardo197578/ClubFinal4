@@ -1,7 +1,9 @@
+// Archivo: MetodoPago.cs
 using System;
 
 namespace ClubDeportivo.Models
 {
+    // Enumeración de los métodos de pago disponibles
     public enum MetodoPago
     {
         EFECTIVO,
